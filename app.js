@@ -2,18 +2,15 @@ const Express = require( 'express' );
 const config = require( './config.js' );
 const Log = require( './log.js' );
 const path = require( 'path' );
+const request = require('superagent');
 
 const logger = Log.create( "app.js" );
 const express = new Express();
-// const router = Express.Router();
-
 
 // need json validation
 logger.info( '-|- cape ship helm -|-' );
 logger.info( 'Registering routes' );
 config.shipSpec.routes.forEach( ( route ) => {
-    logger.info( 'Registering: ' + route.path );
-
     if ( route.resource.assets ) {
         route.resource.assets.forEach( ( file ) => {
             const url = route.path + '/' + file;
@@ -28,9 +25,28 @@ config.shipSpec.routes.forEach( ( route ) => {
 
     if ( route.resource.asset ) {
         const filePath = path.join( config.shipAssetsDir, route.resource.asset );
+        logger.info( 'Registering: asset ', route.path, '->', filePath );
         express.get( route.path, ( req, res ) => {
             res.sendFile( filePath );
         } );
+    }
+
+    if ( route.resource.api ) {
+
+        // test endpoint
+        let path = route.path + '/test';
+        let remotePath = config.shipCabinAddress + '/v1/test';
+        logger.info( 'Registering: api ', path, '->', remotePath );
+        express.get( path, ( req, eRes ) => {
+            request.get( remotePath ).end(
+                ( err, res ) => {
+                    eRes.send(
+                        res.text
+                    );
+                }
+            );
+        } );
+
     }
 } );
 

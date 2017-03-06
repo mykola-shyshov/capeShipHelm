@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "dependencies": {
     "errorhandler": "^1.4.3",
-    "express": "^4.15.1"
+    "express": "^4.15.1",
+    "superagent": "^3.5.0"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
