@@ -33,13 +33,14 @@ config.shipSpec.routes.forEach( ( route ) => {
 
     if ( route.resource.api ) {
 
-        // test endpoint
-        let path = route.path + '/test';
-        let remotePath = config.shipCabinAddress + '/v1/test';
+        // goods endpoint
+        let path = route.path + '/v1/goods';
+        let remotePath = config.shipCabinAddress + '/v1/goods/';
         logger.info( 'Registering: api ', path, '->', remotePath );
         express.get( path, ( req, eRes ) => {
             request.get( remotePath ).end(
                 ( err, res ) => {
+                    eRes.setHeader('Content-Type', 'application/json');
                     eRes.send(
                         res.text
                     );
