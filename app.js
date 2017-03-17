@@ -94,28 +94,39 @@ function registerProxy(express, options) {
 
     logger.info('Registering: api ', method, path, '->', remotePath);
 
-    express.get(path, (eReq, eRes) => {
-        let proxyRequet;
+    let expressHandler = express[method];
+    if (expressHandler === undefined) {
+        throw new Error('Method is not supported ' + method);
+    }
+
+    (expressHandler.bind(express))(path, (eReq, eRes) => {
+        logger.info('Proxying request;', method, remotePath);
+
+        let proxyRequest;
 
         switch (method) {
             case 'get':
-                proxyRequet = request.get(remotePath);
+                proxyRequest = request.get(remotePath);
                 break;
             case 'post':
-                proxyRequet = request.post(remotePath).data(eReq.body);
+                proxyRequest = request.post(remotePath).send(eReq.body);
+                break;
+            case 'put':
+                proxyRequest = request.put(remotePath).send(eReq.body);
                 break;
             default:
                 throw new Error('Method is not supported ' + method);
         }
 
-        proxyRequet
+        proxyRequest
             .set('Authorization', eReq.headers['authorization'] || '')
             .end((err, res) => {
-                    eRes.setHeader('Content-Type', 'application/json');
+                logger.info('Request proxied;', method, remotePath);
+                eRes.setHeader('Content-Type', 'application/json');
 
-                    eRes.send(
-                        res.text
-                    );
+                eRes.send(
+                    res.text
+                );
             });
     });
 }

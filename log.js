@@ -8,7 +8,10 @@ class Logger {
     }
 
     info() {
-        console.info.apply( this, arguments );
+        let prefix = new Date() + ' ' + this.name;
+        let argumentsArray = Array.from(arguments);
+        argumentsArray.unshift(prefix);
+        console.info.apply( this, argumentsArray );
     }
 }
 
